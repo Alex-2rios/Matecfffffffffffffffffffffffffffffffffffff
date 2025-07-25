@@ -38,55 +38,57 @@
                 <label for="euler">Método de Euler</label>
             </div>
 
-            <!-- Entradas para los métodos seleccionados -->
+            <!-- Campos con nombres únicos para cada método -->
             <div id="newton_fields" style="display:none;">
                 <h3>Método de Newton-Raphson</h3>
-                <label for="x0">Valor Inicial (x0): </label>
-                <input type="text" id="x0" name="x0" required>
+                <label for="newton_x0">Valor Inicial (x0): </label>
+                <input type="text" id="newton_x0" name="newton_x0">
             </div>
 
             <div id="bisection_fields" style="display:none;">
                 <h3>Método de Bisección</h3>
-                <label for="a">Valor a: </label>
-                <input type="text" id="a" name="a" required>
-                <label for="b">Valor b: </label>
-                <input type="text" id="b" name="b" required>
+                <label for="bisection_a">Valor a: </label>
+                <input type="text" id="bisection_a" name="bisection_a">
+                <label for="bisection_b">Valor b: </label>
+                <input type="text" id="bisection_b" name="bisection_b">
             </div>
 
             <div id="secant_fields" style="display:none;">
                 <h3>Método de Secantes</h3>
-                <label for="x1">Valor Inicial 2 (x1): </label>
-                <input type="text" id="x1" name="x1" required>
+                <label for="secant_x0">Valor Inicial 1 (x0): </label>
+                <input type="text" id="secant_x0" name="secant_x0">
+                <label for="secant_x1">Valor Inicial 2 (x1): </label>
+                <input type="text" id="secant_x1" name="secant_x1">
             </div>
 
             <div id="regula_falsi_fields" style="display:none;">
                 <h3>Método de Regula Falsi</h3>
-                <label for="a">Valor a: </label>
-                <input type="text" id="a" name="a" required>
-                <label for="b">Valor b: </label>
-                <input type="text" id="b" name="b" required>
+                <label for="regula_falsi_a">Valor a: </label>
+                <input type="text" id="regula_falsi_a" name="regula_falsi_a">
+                <label for="regula_falsi_b">Valor b: </label>
+                <input type="text" id="regula_falsi_b" name="regula_falsi_b">
             </div>
 
             <div id="trapezoidal_fields" style="display:none;">
                 <h3>Método de Trapecio</h3>
-                <label for="a">Valor a: </label>
-                <input type="text" id="a" name="a" required>
-                <label for="b">Valor b: </label>
-                <input type="text" id="b" name="b" required>
-                <label for="n">Número de subdivisiones (n): </label>
-                <input type="text" id="n" name="n" required>
+                <label for="trapezoidal_a">Valor a: </label>
+                <input type="text" id="trapezoidal_a" name="trapezoidal_a">
+                <label for="trapezoidal_b">Valor b: </label>
+                <input type="text" id="trapezoidal_b" name="trapezoidal_b">
+                <label for="trapezoidal_n">Número de subdivisiones (n): </label>
+                <input type="text" id="trapezoidal_n" name="trapezoidal_n">
             </div>
 
             <div id="euler_fields" style="display:none;">
                 <h3>Método de Euler</h3>
-                <label for="y0">Valor inicial (y0): </label>
-                <input type="text" id="y0" name="y0" required>
-                <label for="t0">Tiempo inicial (t0): </label>
-                <input type="text" id="t0" name="t0" required>
-                <label for="tn">Tiempo final (tn): </label>
-                <input type="text" id="tn" name="tn" required>
-                <label for="h">Paso (h): </label>
-                <input type="text" id="h" name="h" required>
+                <label for="euler_y0">Valor inicial (y0): </label>
+                <input type="text" id="euler_y0" name="euler_y0">
+                <label for="euler_t0">Tiempo inicial (t0): </label>
+                <input type="text" id="euler_t0" name="euler_t0">
+                <label for="euler_tn">Tiempo final (tn): </label>
+                <input type="text" id="euler_tn" name="euler_tn">
+                <label for="euler_h">Paso (h): </label>
+                <input type="text" id="euler_h" name="euler_h">
             </div>
 
             <button type="submit">Calcular</button>
@@ -151,4 +153,4 @@
         });
     </script>
 </body>
-</html>s
+</html>
