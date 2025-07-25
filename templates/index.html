@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Método de Aproximación y Error Numérico</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Método de Aproximación y Error Numérico</h1>
+        
+        <!-- Formulario para seleccionar los métodos -->
+        <form method="POST">
+            <h3>Seleccionar Métodos</h3>
+            <div>
+                <input type="checkbox" id="newton" name="newton">
+                <label for="newton">Método de Newton-Raphson</label>
+            </div>
+            <div>
+                <input type="checkbox" id="bisection" name="bisection">
+                <label for="bisection">Método de Bisección</label>
+            </div>
+            <div>
+                <input type="checkbox" id="secant" name="secant">
+                <label for="secant">Método de Secantes</label>
+            </div>
+            <div>
+                <input type="checkbox" id="regula_falsi" name="regula_falsi">
+                <label for="regula_falsi">Método de Regula Falsi</label>
+            </div>
+            <div>
+                <input type="checkbox" id="trapezoidal" name="trapezoidal">
+                <label for="trapezoidal">Método de Trapecio</label>
+            </div>
+            <div>
+                <input type="checkbox" id="euler" name="euler">
+                <label for="euler">Método de Euler</label>
+            </div>
+
+            <!-- Entradas para los métodos seleccionados -->
+            <div id="newton_fields" style="display:none;">
+                <h3>Método de Newton-Raphson</h3>
+                <label for="x0">Valor Inicial (x0): </label>
+                <input type="text" id="x0" name="x0" required>
+            </div>
+
+            <div id="bisection_fields" style="display:none;">
+                <h3>Método de Bisección</h3>
+                <label for="a">Valor a: </label>
+                <input type="text" id="a" name="a" required>
+                <label for="b">Valor b: </label>
+                <input type="text" id="b" name="b" required>
+            </div>
+
+            <div id="secant_fields" style="display:none;">
+                <h3>Método de Secantes</h3>
+                <label for="x1">Valor Inicial 2 (x1): </label>
+                <input type="text" id="x1" name="x1" required>
+            </div>
+
+            <div id="regula_falsi_fields" style="display:none;">
+                <h3>Método de Regula Falsi</h3>
+                <label for="a">Valor a: </label>
+                <input type="text" id="a" name="a" required>
+                <label for="b">Valor b: </label>
+                <input type="text" id="b" name="b" required>
+            </div>
+
+            <div id="trapezoidal_fields" style="display:none;">
+                <h3>Método de Trapecio</h3>
+                <label for="a">Valor a: </label>
+                <input type="text" id="a" name="a" required>
+                <label for="b">Valor b: </label>
+                <input type="text" id="b" name="b" required>
+                <label for="n">Número de subdivisiones (n): </label>
+                <input type="text" id="n" name="n" required>
+            </div>
+
+            <div id="euler_fields" style="display:none;">
+                <h3>Método de Euler</h3>
+                <label for="y0">Valor inicial (y0): </label>
+                <input type="text" id="y0" name="y0" required>
+                <label for="t0">Tiempo inicial (t0): </label>
+                <input type="text" id="t0" name="t0" required>
+                <label for="tn">Tiempo final (tn): </label>
+                <input type="text" id="tn" name="tn" required>
+                <label for="h">Paso (h): </label>
+                <input type="text" id="h" name="h" required>
+            </div>
+
+            <button type="submit">Calcular</button>
+        </form>
+
+        <!-- Mostrar resultados -->
+        {% if result is not none %}
+            <h2>Resultado del Método de Newton-Raphson:</h2>
+            <p>Raíz Aproximada: {{ result }}</p>
+            <p>Error numérico: {{ error }}</p>
+        {% endif %}
+
+        {% if result_bisection is not none %}
+            <h2>Resultado del Método de Bisección:</h2>
+            <p>Raíz Aproximada: {{ result_bisection }}</p>
+            <p>Error numérico: {{ error_bisection }}</p>
+        {% endif %}
+
+        {% if result_secant is not none %}
+            <h2>Resultado del Método de Secantes:</h2>
+            <p>Raíz Aproximada: {{ result_secant }}</p>
+            <p>Error numérico: {{ error_secant }}</p>
+        {% endif %}
+
+        {% if result_regula_falsi is not none %}
+            <h2>Resultado del Método de Regula Falsi:</h2>
+            <p>Raíz Aproximada: {{ result_regula_falsi }}</p>
+            <p>Error numérico: {{ error_regula_falsi }}</p>
+        {% endif %}
+
+        {% if result_trapezoidal is not none %}
+            <h2>Resultado del Método de Trapecio:</h2>
+            <p>Aproximación de la integral: {{ result_trapezoidal }}</p>
+        {% endif %}
+
+        {% if result_euler is not none %}
+            <h2>Resultado del Método de Euler:</h2>
+            <p>Valor Aproximado: {{ result_euler }}</p>
+            <p>Error numérico: {{ error_euler }}</p>
+        {% endif %}
+    </div>
+
+    <script>
+        // Mostrar campos de entrada solo si los métodos son seleccionados
+        document.getElementById("newton").addEventListener("change", function() {
+            document.getElementById("newton_fields").style.display = this.checked ? "block" : "none";
+        });
+        document.getElementById("bisection").addEventListener("change", function() {
+            document.getElementById("bisection_fields").style.display = this.checked ? "block" : "none";
+        });
+        document.getElementById("secant").addEventListener("change", function() {
+            document.getElementById("secant_fields").style.display = this.checked ? "block" : "none";
+        });
+        document.getElementById("regula_falsi").addEventListener("change", function() {
+            document.getElementById("regula_falsi_fields").style.display = this.checked ? "block" : "none";
+        });
+        document.getElementById("trapezoidal").addEventListener("change", function() {
+            document.getElementById("trapezoidal_fields").style.display = this.checked ? "block" : "none";
+        });
+        document.getElementById("euler").addEventListener("change", function() {
+            document.getElementById("euler_fields").style.display = this.checked ? "block" : "none";
+        });
+    </script>
+</body>
+</html>s
