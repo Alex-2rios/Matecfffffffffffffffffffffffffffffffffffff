@@ -3,153 +3,560 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Método de Aproximación y Error Numérico</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Calculadora Numérica Avanzada</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .method-section {
+            margin-bottom: 2rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+        }
+        .method-header {
+            cursor: pointer;
+            padding: 0.75rem 1.25rem;
+            background-color: #e9ecef;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+        }
+        .result-table {
+            font-size: 0.9rem;
+        }
+        .iteration-table {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .function-example {
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            background-color: #e9ecef;
+            border-radius: 0.25rem;
+            display: inline-block;
+            margin: 0.25rem;
+        }
+        .function-example:hover {
+            background-color: #d1e7ff;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Método de Aproximación y Error Numérico</h1>
-        
-        <!-- Formulario para seleccionar los métodos -->
+    <div class="container py-4">
+        <div class="text-center mb-4">
+            <h1 class="display-4"><i class="fas fa-calculator me-2"></i>Calculadora Numérica Avanzada</h1>
+            <p class="lead">Herramienta para métodos de aproximación y análisis de error numérico</p>
+        </div>
+
         <form method="POST">
-            <h3>Seleccionar Métodos</h3>
-            <div>
-                <input type="checkbox" id="newton" name="newton">
-                <label for="newton">Método de Newton-Raphson</label>
-            </div>
-            <div>
-                <input type="checkbox" id="bisection" name="bisection">
-                <label for="bisection">Método de Bisección</label>
-            </div>
-            <div>
-                <input type="checkbox" id="secant" name="secant">
-                <label for="secant">Método de Secantes</label>
-            </div>
-            <div>
-                <input type="checkbox" id="regula_falsi" name="regula_falsi">
-                <label for="regula_falsi">Método de Regula Falsi</label>
-            </div>
-            <div>
-                <input type="checkbox" id="trapezoidal" name="trapezoidal">
-                <label for="trapezoidal">Método de Trapecio</label>
-            </div>
-            <div>
-                <input type="checkbox" id="euler" name="euler">
-                <label for="euler">Método de Euler</label>
-            </div>
-
-            <!-- Campos con nombres únicos para cada método -->
-            <div id="newton_fields" style="display:none;">
-                <h3>Método de Newton-Raphson</h3>
-                <label for="newton_x0">Valor Inicial (x0): </label>
-                <input type="text" id="newton_x0" name="newton_x0">
-            </div>
-
-            <div id="bisection_fields" style="display:none;">
-                <h3>Método de Bisección</h3>
-                <label for="bisection_a">Valor a: </label>
-                <input type="text" id="bisection_a" name="bisection_a">
-                <label for="bisection_b">Valor b: </label>
-                <input type="text" id="bisection_b" name="bisection_b">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3><i class="fas fa-functions me-2"></i>Funciones</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Función f(x):</label>
+                        <input type="text" class="form-control" name="function" value="{{ function }}" required>
+                        <div class="form-text">
+                            Ejemplos: 
+                            <span class="function-example" onclick="document.querySelector('[name=function]').value='x**2 - 2'">x² - 2</span>
+                            <span class="function-example" onclick="document.querySelector('[name=function]').value='math.sin(x)'">sen(x)</span>
+                            <span class="function-example" onclick="document.querySelector('[name=function]').value='math.exp(x) - 2'">eˣ - 2</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Derivada f'(x) (para Newton):</label>
+                        <input type="text" class="form-control" name="derivative" value="{{ derivative }}">
+                        <div class="form-text">
+                            Ejemplos: 
+                            <span class="function-example" onclick="document.querySelector('[name=derivative]').value='2*x'">2x</span>
+                            <span class="function-example" onclick="document.querySelector('[name=derivative]').value='math.cos(x)'">cos(x)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Ecuación diferencial f(t, y):</label>
+                        <input type="text" class="form-control" name="edo" value="{{ edo }}">
+                        <div class="form-text">
+                            Ejemplos: 
+                            <span class="function-example" onclick="document.querySelector('[name=edo]').value='-2*y'">-2y</span>
+                            <span class="function-example" onclick="document.querySelector('[name=edo]').value='t - y'">t - y</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div id="secant_fields" style="display:none;">
-                <h3>Método de Secantes</h3>
-                <label for="secant_x0">Valor Inicial 1 (x0): </label>
-                <input type="text" id="secant_x0" name="secant_x0">
-                <label for="secant_x1">Valor Inicial 2 (x1): </label>
-                <input type="text" id="secant_x1" name="secant_x1">
+            <!-- Newton-Raphson -->
+            <div class="method-section">
+                <div class="method-header d-flex justify-content-between align-items-center" onclick="toggleSection('newton')">
+                    <h4 class="mb-0"><i class="fas fa-bolt me-2"></i>Método de Newton-Raphson</h4>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="newton-content">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="newton" name="newton">
+                        <label class="form-check-label" for="newton">Activar método</label>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="newton_x0" class="form-label">Valor Inicial (x₀):</label>
+                            <input type="number" class="form-control" id="newton_x0" name="newton_x0" step="any" value="1.0">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="newton_tol" class="form-label">Tolerancia:</label>
+                            <input type="number" class="form-control" id="newton_tol" name="newton_tol" step="1e-6" min="1e-10" value="0.000001">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ejemplos:</label>
+                            <div>
+                                <span class="function-example" onclick="document.getElementById('newton_x0').value='1.0'">x₀=1.0</span>
+                                <span class="function-example" onclick="document.getElementById('newton_x0').value='3.0'">x₀=3.0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div id="regula_falsi_fields" style="display:none;">
-                <h3>Método de Regula Falsi</h3>
-                <label for="regula_falsi_a">Valor a: </label>
-                <input type="text" id="regula_falsi_a" name="regula_falsi_a">
-                <label for="regula_falsi_b">Valor b: </label>
-                <input type="text" id="regula_falsi_b" name="regula_falsi_b">
+            <!-- Bisección -->
+            <div class="method-section">
+                <div class="method-header d-flex justify-content-between align-items-center" onclick="toggleSection('bisection')">
+                    <h4 class="mb-0"><i class="fas fa-divide me-2"></i>Método de Bisección</h4>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="bisection-content">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="bisection" name="bisection">
+                        <label class="form-check-label" for="bisection">Activar método</label>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="bisection_a" class="form-label">Límite inferior (a):</label>
+                            <input type="number" class="form-control" id="bisection_a" name="bisection_a" step="any" value="1.0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="bisection_b" class="form-label">Límite superior (b):</label>
+                            <input type="number" class="form-control" id="bisection_b" name="bisection_b" step="any" value="2.0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="bisection_tol" class="form-label">Tolerancia:</label>
+                            <input type="number" class="form-control" id="bisection_tol" name="bisection_tol" step="1e-6" min="1e-10" value="0.000001">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Ejemplos:</label>
+                            <div>
+                                <span class="function-example" onclick="document.getElementById('bisection_a').value='1.0';document.getElementById('bisection_b').value='2.0'">a=1, b=2</span>
+                                <span class="function-example" onclick="document.getElementById('bisection_a').value='0.0';document.getElementById('bisection_b').value='1.0'">a=0, b=1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div id="trapezoidal_fields" style="display:none;">
-                <h3>Método de Trapecio</h3>
-                <label for="trapezoidal_a">Valor a: </label>
-                <input type="text" id="trapezoidal_a" name="trapezoidal_a">
-                <label for="trapezoidal_b">Valor b: </label>
-                <input type="text" id="trapezoidal_b" name="trapezoidal_b">
-                <label for="trapezoidal_n">Número de subdivisiones (n): </label>
-                <input type="text" id="trapezoidal_n" name="trapezoidal_n">
+            <!-- Secantes -->
+            <div class="method-section">
+                <div class="method-header d-flex justify-content-between align-items-center" onclick="toggleSection('secant')">
+                    <h4 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Método de Secantes</h4>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="secant-content">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="secant" name="secant">
+                        <label class="form-check-label" for="secant">Activar método</label>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="secant_x0" class="form-label">Valor Inicial 1 (x₀):</label>
+                            <input type="number" class="form-control" id="secant_x0" name="secant_x0" step="any" value="1.0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="secant_x1" class="form-label">Valor Inicial 2 (x₁):</label>
+                            <input type="number" class="form-control" id="secant_x1" name="secant_x1" step="any" value="2.0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="secant_tol" class="form-label">Tolerancia:</label>
+                            <input type="number" class="form-control" id="secant_tol" name="secant_tol" step="1e-6" min="1e-10" value="0.000001">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Ejemplos:</label>
+                            <div>
+                                <span class="function-example" onclick="document.getElementById('secant_x0').value='1.0';document.getElementById('secant_x1').value='2.0'">x₀=1, x₁=2</span>
+                                <span class="function-example" onclick="document.getElementById('secant_x0').value='3.0';document.getElementById('secant_x1').value='4.0'">x₀=3, x₁=4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div id="euler_fields" style="display:none;">
-                <h3>Método de Euler</h3>
-                <label for="euler_y0">Valor inicial (y0): </label>
-                <input type="text" id="euler_y0" name="euler_y0">
-                <label for="euler_t0">Tiempo inicial (t0): </label>
-                <input type="text" id="euler_t0" name="euler_t0">
-                <label for="euler_tn">Tiempo final (tn): </label>
-                <input type="text" id="euler_tn" name="euler_tn">
-                <label for="euler_h">Paso (h): </label>
-                <input type="text" id="euler_h" name="euler_h">
+            <!-- Regula Falsi -->
+            <div class="method-section">
+                <div class="method-header d-flex justify-content-between align-items-center" onclick="toggleSection('regula_falsi')">
+                    <h4 class="mb-0"><i class="fas fa-balance-scale me-2"></i>Método de Regula Falsi</h4>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="regula_falsi-content">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="regula_falsi" name="regula_falsi">
+                        <label class="form-check-label" for="regula_falsi">Activar método</label>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="regula_falsi_a" class="form-label">Límite inferior (a):</label>
+                            <input type="number" class="form-control" id="regula_falsi_a" name="regula_falsi_a" step="any" value="1.0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="regula_falsi_b" class="form-label">Límite superior (b):</label>
+                            <input type="number" class="form-control" id="regula_falsi_b" name="regula_falsi_b" step="any" value="2.0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="regula_falsi_tol" class="form-label">Tolerancia:</label>
+                            <input type="number" class="form-control" id="regula_falsi_tol" name="regula_falsi_tol" step="1e-6" min="1e-10" value="0.000001">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Ejemplos:</label>
+                            <div>
+                                <span class="function-example" onclick="document.getElementById('regula_falsi_a').value='1.0';document.getElementById('regula_falsi_b').value='2.0'">a=1, b=2</span>
+                                <span class="function-example" onclick="document.getElementById('regula_falsi_a').value='0.0';document.getElementById('regula_falsi_b').value='1.0'">a=0, b=1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <button type="submit">Calcular</button>
+            <!-- Trapecio -->
+            <div class="method-section">
+                <div class="method-header d-flex justify-content-between align-items-center" onclick="toggleSection('trapezoidal')">
+                    <h4 class="mb-0"><i class="fas fa-shapes me-2"></i>Método del Trapecio</h4>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="trapezoidal-content">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="trapezoidal" name="trapezoidal">
+                        <label class="form-check-label" for="trapezoidal">Activar método</label>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="trapezoidal_a" class="form-label">Límite inferior (a):</label>
+                            <input type="number" class="form-control" id="trapezoidal_a" name="trapezoidal_a" step="any" value="0.0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="trapezoidal_b" class="form-label">Límite superior (b):</label>
+                            <input type="number" class="form-control" id="trapezoidal_b" name="trapezoidal_b" step="any" value="1.0">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="trapezoidal_n" class="form-label">Número de subintervalos (n):</label>
+                            <input type="number" class="form-control" id="trapezoidal_n" name="trapezoidal_n" min="1" value="4">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Ejemplos:</label>
+                            <div>
+                                <span class="function-example" onclick="document.getElementById('trapezoidal_a').value='0';document.getElementById('trapezoidal_b').value='1';document.getElementById('trapezoidal_n').value='4'">a=0,b=1,n=4</span>
+                                <span class="function-example" onclick="document.getElementById('trapezoidal_a').value='0';document.getElementById('trapezoidal_b').value='math.pi';document.getElementById('trapezoidal_n').value='10'">a=0,b=π,n=10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Euler -->
+            <div class="method-section">
+                <div class="method-header d-flex justify-content-between align-items-center" onclick="toggleSection('euler')">
+                    <h4 class="mb-0"><i class="fas fa-chart-line me-2"></i>Método de Euler</h4>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="euler-content">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="euler" name="euler">
+                        <label class="form-check-label" for="euler">Activar método</label>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <label for="euler_y0" class="form-label">Valor inicial (y₀):</label>
+                            <input type="number" class="form-control" id="euler_y0" name="euler_y0" step="any" value="1.0">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="euler_t0" class="form-label">Tiempo inicial (t₀):</label>
+                            <input type="number" class="form-control" id="euler_t0" name="euler_t0" step="any" value="0.0">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="euler_tn" class="form-label">Tiempo final (t):</label>
+                            <input type="number" class="form-control" id="euler_tn" name="euler_tn" step="any" value="1.0">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="euler_h" class="form-label">Paso (h):</label>
+                            <input type="number" class="form-control" id="euler_h" name="euler_h" step="any" min="0.001" value="0.1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ejemplos:</label>
+                            <div>
+                                <span class="function-example" onclick="
+                                    document.getElementById('euler_y0').value='1';
+                                    document.getElementById('euler_t0').value='0';
+                                    document.getElementById('euler_tn').value='1';
+                                    document.getElementById('euler_h').value='0.1';
+                                ">y₀=1,t₀=0,t=1,h=0.1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-calculator me-2"></i>Calcular Métodos Seleccionados
+                </button>
+            </div>
         </form>
 
-        <!-- Mostrar resultados -->
-        {% if result is not none %}
-            <h2>Resultado del Método de Newton-Raphson:</h2>
-            <p>Raíz Aproximada: {{ result }}</p>
-            <p>Error numérico: {{ error }}</p>
-        {% endif %}
-
-        {% if result_bisection is not none %}
-            <h2>Resultado del Método de Bisección:</h2>
-            <p>Raíz Aproximada: {{ result_bisection }}</p>
-            <p>Error numérico: {{ error_bisection }}</p>
-        {% endif %}
-
-        {% if result_secant is not none %}
-            <h2>Resultado del Método de Secantes:</h2>
-            <p>Raíz Aproximada: {{ result_secant }}</p>
-            <p>Error numérico: {{ error_secant }}</p>
-        {% endif %}
-
-        {% if result_regula_falsi is not none %}
-            <h2>Resultado del Método de Regula Falsi:</h2>
-            <p>Raíz Aproximada: {{ result_regula_falsi }}</p>
-            <p>Error numérico: {{ error_regula_falsi }}</p>
-        {% endif %}
-
-        {% if result_trapezoidal is not none %}
-            <h2>Resultado del Método de Trapecio:</h2>
-            <p>Aproximación de la integral: {{ result_trapezoidal }}</p>
-        {% endif %}
-
-        {% if result_euler is not none %}
-            <h2>Resultado del Método de Euler:</h2>
-            <p>Valor Aproximado: {{ result_euler }}</p>
-            <p>Error numérico: {{ error_euler }}</p>
+        <!-- Resultados -->
+        {% if results %}
+            <div class="mt-5">
+                <h2 class="text-center mb-4"><i class="fas fa-chart-bar me-2"></i>Resultados</h2>
+                
+                {% if 'error' in results %}
+                    <div class="alert alert-danger">
+                        <strong>Error:</strong> {{ results.error|safe }}
+                    </div>
+                {% endif %}
+                
+                <!-- Newton-Raphson -->
+                {% if 'newton' in results %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h3><i class="fas fa-bolt me-2"></i>Método de Newton-Raphson</h3>
+                        </div>
+                        <div class="card-body">
+                            {% if results.newton.error_msg %}
+                                <div class="alert alert-warning">
+                                    {{ results.newton.error_msg }}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5>Resultado Final</h5>
+                                            <p><strong>Raíz aproximada:</strong> {{ results.newton.root | round(6) if results.newton.root is not none else 'N/A' }}</p>
+                                            <p><strong>Residuo:</strong> {{ results.newton.error | round(8) if results.newton.error is not none else 'N/A' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h5>Iteraciones</h5>
+                                    <div class="table-responsive iteration-table">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Iteración</th>
+                                                    <th>x</th>
+                                                    <th>f(x)</th>
+                                                    <th>f'(x)</th>
+                                                    <th>x_new</th>
+                                                    <th>Error</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for iter in results.newton.iterations %}
+                                                    <tr>
+                                                        <td>{{ iter.iteration }}</td>
+                                                        <td>{{ iter.x | round(6) }}</td>
+                                                        <td>{{ iter['f(x)'] | round(6) }}</td>
+                                                        <td>{{ iter["f'(x)"] | round(6) }}</td>
+                                                        <td>{{ iter.x_new | round(6) }}</td>
+                                                        <td>{{ iter.error | round(6) }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- Bisección -->
+                {% if 'bisection' in results %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h3><i class="fas fa-divide me-2"></i>Método de Bisección</h3>
+                        </div>
+                        <div class="card-body">
+                            {% if results.bisection.error_msg %}
+                                <div class="alert alert-warning">
+                                    {{ results.bisection.error_msg }}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5>Resultado Final</h5>
+                                            <p><strong>Raíz aproximada:</strong> {{ results.bisection.root | round(6) if results.bisection.root is not none else 'N/A' }}</p>
+                                            <p><strong>Residuo:</strong> {{ results.bisection.error | round(8) if results.bisection.error is not none else 'N/A' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h5>Iteraciones</h5>
+                                    <div class="table-responsive iteration-table">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Iteración</th>
+                                                    <th>a</th>
+                                                    <th>b</th>
+                                                    <th>c</th>
+                                                    <th>f(a)</th>
+                                                    <th>f(b)</th>
+                                                    <th>f(c)</th>
+                                                    <th>Error</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for iter in results.bisection.iterations %}
+                                                    <tr>
+                                                        <td>{{ iter.iteration }}</td>
+                                                        <td>{{ iter.a | round(6) }}</td>
+                                                        <td>{{ iter.b | round(6) }}</td>
+                                                        <td>{{ iter.c | round(6) }}</td>
+                                                        <td>{{ iter['f(a)'] | round(6) }}</td>
+                                                        <td>{{ iter['f(b)'] | round(6) }}</td>
+                                                        <td>{{ iter['f(c)'] | round(6) }}</td>
+                                                        <td>{{ iter.error | round(6) }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- Trapecio -->
+                {% if 'trapezoidal' in results %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h3><i class="fas fa-shapes me-2"></i>Método del Trapecio</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5>Resultado Final</h5>
+                                            <p><strong>Aproximación:</strong> {{ results.trapezoidal.result | round(6) }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Puntos de evaluación</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>x</th>
+                                                    <th>f(x)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for i in range(results.trapezoidal.points | length) %}
+                                                    <tr>
+                                                        <td>{{ results.trapezoidal.points[i] | round(4) }}</td>
+                                                        <td>{{ results.trapezoidal.values[i] | round(6) }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- Euler -->
+                {% if 'euler' in results %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-danger text-white">
+                            <h3><i class="fas fa-chart-line me-2"></i>Método de Euler</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5>Resultado Final</h5>
+                                            <p><strong>Valor aproximado:</strong> {{ results.euler.result | round(6) }}</p>
+                                            {% if results.euler.exact is not none %}
+                                                <p><strong>Valor exacto:</strong> {{ results.euler.exact | round(6) }}</p>
+                                                <p><strong>Error:</strong> {{ results.euler.error | round(8) }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h5>Puntos de la solución</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>t</th>
+                                                    <th>y</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for i in range(results.euler.points | length) %}
+                                                    <tr>
+                                                        <td>{{ results.euler.points[i] | round(4) }}</td>
+                                                        <td>{{ results.euler.values[i] | round(6) }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
         {% endif %}
     </div>
 
     <script>
-        // Mostrar campos de entrada solo si los métodos son seleccionados
-        document.getElementById("newton").addEventListener("change", function() {
-            document.getElementById("newton_fields").style.display = this.checked ? "block" : "none";
-        });
-        document.getElementById("bisection").addEventListener("change", function() {
-            document.getElementById("bisection_fields").style.display = this.checked ? "block" : "none";
-        });
-        document.getElementById("secant").addEventListener("change", function() {
-            document.getElementById("secant_fields").style.display = this.checked ? "block" : "none";
-        });
-        document.getElementById("regula_falsi").addEventListener("change", function() {
-            document.getElementById("regula_falsi_fields").style.display = this.checked ? "block" : "none";
-        });
-        document.getElementById("trapezoidal").addEventListener("change", function() {
-            document.getElementById("trapezoidal_fields").style.display = this.checked ? "block" : "none";
-        });
-        document.getElementById("euler").addEventListener("change", function() {
-            document.getElementById("euler_fields").style.display = this.checked ? "block" : "none";
+        // Toggle sections
+        function toggleSection(method) {
+            const content = document.getElementById(`${method}-content`);
+            const icon = document.querySelector(`#${method}-content`).previousElementSibling.querySelector('.fa-chevron-down');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+            } else {
+                content.style.display = 'none';
+                icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+            }
+        }
+        
+        // Initialize sections
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = ['newton', 'bisection', 'secant', 'regula_falsi', 'trapezoidal', 'euler'];
+            sections.forEach(section => {
+                const content = document.getElementById(`${section}-content`);
+                if (content) {
+                    content.style.display = 'block';
+                }
+            });
         });
     </script>
 </body>

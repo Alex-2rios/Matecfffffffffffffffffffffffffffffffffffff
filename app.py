@@ -3,191 +3,287 @@ import math
 
 app = Flask(__name__)
 
+# Entorno seguro para evaluación de funciones
+safe_dict = {
+    'abs': abs, 'max': max, 'min': min, 'pow': pow, 'round': round,
+    'math': math, 'sin': math.sin, 'cos': math.cos, 'tan': math.tan,
+    'exp': math.exp, 'log': math.log, 'log10': math.log10, 'sqrt': math.sqrt,
+    'pi': math.pi, 'e': math.e
+}
+safe_dict['__builtins__'] = {}
+
 # Métodos de aproximación
 
-# Método de Newton-Raphson
-def newton_raphson(f, df, x0, tol=1e-5, max_iter=100):
+def newton_raphson(f, df, x0, tol=1e-6, max_iter=100):
+    iterations = []
     x = x0
-    for _ in range(max_iter):
+    for i in range(max_iter):
         fx = f(x)
-        if abs(fx) < tol:
-            return x
         dfx = df(x)
-        if dfx == 0:
-            break
-        x = x - fx / dfx
-    return x
+        
+        if abs(dfx) < 1e-15:
+            return None, iterations, "Derivada cero"
+            
+        x_new = x - fx / dfx
+        error = abs(x_new - x)
+        iterations.append({
+            'iteration': i+1,
+            'x': x,
+            'f(x)': fx,
+            "f'(x)": dfx,
+            'x_new': x_new,
+            'error': error
+        })
+        
+        if error < tol or abs(fx) < tol:
+            return x_new, iterations, None
+            
+        x = x_new
+        
+    return x, iterations, "Máximas iteraciones alcanzadas"
 
-# Método de Bisección
-def bisection_method(f, a, b, tol=1e-5, max_iter=100):
-    if f(a) * f(b) >= 0:
-        return None
-    for _ in range(max_iter):
+def bisection_method(f, a, b, tol=1e-6, max_iter=100):
+    if f(a) * f(b) > 0:
+        return None, [], "No hay cambio de signo en el intervalo"
+    
+    iterations = []
+    for i in range(max_iter):
         c = (a + b) / 2
         fc = f(c)
-        if abs(fc) < tol:
-            return c
-        if f(a) * fc < 0:
-            b = c
-        else:
-            a = c
-    return (a + b) / 2
-
-# Método de Secantes
-def secant_method(f, x0, x1, tol=1e-5, max_iter=100):
-    for _ in range(max_iter):
-        fx0 = f(x0)
-        fx1 = f(x1)
-        if abs(fx1) < tol:
-            return x1
-        denom = fx1 - fx0
-        if abs(denom) < tol:
-            return x1
-        x2 = x1 - fx1 * (x1 - x0) / denom
-        x0, x1 = x1, x2
-    return x1
-
-# Método de Regula Falsi
-def regula_falsi_method(f, a, b, tol=1e-5, max_iter=100):
-    if f(a) * f(b) >= 0:
-        return None
-    for _ in range(max_iter):
         fa = f(a)
         fb = f(b)
-        c = b - fb * (b - a) / (fb - fa)
-        fc = f(c)
-        if abs(fc) < tol:
-            return c
+        error = abs(b - a) / 2
+        
+        iterations.append({
+            'iteration': i+1,
+            'a': a,
+            'b': b,
+            'c': c,
+            'f(a)': fa,
+            'f(b)': fb,
+            'f(c)': fc,
+            'error': error
+        })
+        
+        if abs(fc) < tol or error < tol:
+            return c, iterations, None
+            
         if fa * fc < 0:
             b = c
         else:
             a = c
-    return c
+            
+    return (a + b) / 2, iterations, "Máximas iteraciones alcanzadas"
 
-# Método de Trapecio
+def secant_method(f, x0, x1, tol=1e-6, max_iter=100):
+    iterations = []
+    for i in range(max_iter):
+        fx0 = f(x0)
+        fx1 = f(x1)
+        
+        if abs(fx1 - fx0) < 1e-15:
+            return None, iterations, "División por cero"
+            
+        x2 = x1 - fx1 * (x1 - x0) / (fx1 - fx0)
+        error = abs(x2 - x1)
+        
+        iterations.append({
+            'iteration': i+1,
+            'x0': x0,
+            'x1': x1,
+            'f(x0)': fx0,
+            'f(x1)': fx1,
+            'x2': x2,
+            'error': error
+        })
+        
+        if abs(fx1) < tol or error < tol:
+            return x2, iterations, None
+            
+        x0, x1 = x1, x2
+        
+    return x1, iterations, "Máximas iteraciones alcanzadas"
+
+def regula_falsi_method(f, a, b, tol=1e-6, max_iter=100):
+    if f(a) * f(b) > 0:
+        return None, [], "No hay cambio de signo en el intervalo"
+    
+    iterations = []
+    for i in range(max_iter):
+        fa = f(a)
+        fb = f(b)
+        c = b - fb * (b - a) / (fb - fa)
+        fc = f(c)
+        error = abs(fc)
+        
+        iterations.append({
+            'iteration': i+1,
+            'a': a,
+            'b': b,
+            'c': c,
+            'f(a)': fa,
+            'f(b)': fb,
+            'f(c)': fc,
+            'error': error
+        })
+        
+        if abs(fc) < tol:
+            return c, iterations, None
+            
+        if fa * fc < 0:
+            b = c
+        else:
+            a = c
+            
+    return c, iterations, "Máximas iteraciones alcanzadas"
+
 def trapezoidal_method(f, a, b, n):
     h = (b - a) / n
-    sum_val = (f(a) + f(b)) / 2
+    result = (f(a) + f(b)) / 2
+    points = [a]
+    values = [f(a)]
+    
     for i in range(1, n):
-        sum_val += f(a + i * h)
-    return sum_val * h
+        x = a + i * h
+        result += f(x)
+        points.append(x)
+        values.append(f(x))
+        
+    points.append(b)
+    values.append(f(b))
+    return result * h, points, values
 
-# Función de ejemplo: f(x) = x^2 - 2 (Raíz en sqrt(2))
-def f(x):
-    return x**2 - 2
-
-# Derivada de la función: f'(x) = 2x
-def df(x):
-    return 2*x
-
-# Función para la ecuación diferencial: dy/dt = -2y
-def f_diff(t, y):
-    return -2 * y
-
-# Método de Euler para resolver ecuaciones diferenciales
 def euler_method(f, y0, t0, tn, h):
     t = t0
     y = y0
     n = int((tn - t0) / h)
-    for _ in range(n):
+    points = [t0]
+    values = [y0]
+    
+    for i in range(n):
         y += h * f(t, y)
         t += h
+        points.append(t)
+        values.append(y)
+    
     # Último paso si es necesario
     if t < tn:
         h_last = tn - t
         y += h_last * f(t, y)
-    return y
+        t = tn
+        points.append(t)
+        values.append(y)
+        
+    return y, points, values
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    result = None
-    error = None
-    result_bisection = None
-    error_bisection = None
-    result_secant = None
-    error_secant = None
-    result_regula_falsi = None
-    error_regula_falsi = None
-    result_trapezoidal = None
-    error_trapezoidal = None
-    result_euler = None
-    error_euler = None
-
+    results = {}
+    function_expression = "x**2 - 2"
+    derivative_expression = "2*x"
+    edo_expression = "-2*y"
+    
     if request.method == "POST":
         try:
-            exact_value = math.sqrt(2)  # Valor exacto para comparación
+            # Obtener expresiones
+            function_expression = request.form.get("function", "x**2 - 2")
+            derivative_expression = request.form.get("derivative", "2*x")
+            edo_expression = request.form.get("edo", "-2*y")
             
-            # Newton-Raphson
+            # Crear funciones
+            f = lambda x: eval(function_expression, {'x': x, **safe_dict})
+            df = lambda x: eval(derivative_expression, {'x': x, **safe_dict})
+            f_edo = lambda t, y: eval(edo_expression, {'t': t, 'y': y, **safe_dict})
+            
+            # Procesar métodos seleccionados
             if 'newton' in request.form:
                 x0 = float(request.form["newton_x0"])
-                root_newton = newton_raphson(f, df, x0)
-                if root_newton is not None:
-                    error = abs(exact_value - root_newton)
-                    result = root_newton
-
-            # Bisección
+                tol = float(request.form.get("newton_tol", 1e-6))
+                root, iterations, error_msg = newton_raphson(f, df, x0, tol)
+                results['newton'] = {
+                    'root': root,
+                    'iterations': iterations,
+                    'error': abs(f(root)) if root is not None else None,
+                    'error_msg': error_msg
+                }
+                
             if 'bisection' in request.form:
                 a = float(request.form["bisection_a"])
                 b = float(request.form["bisection_b"])
-                root_bisection = bisection_method(f, a, b)
-                if root_bisection is not None:
-                    error_bisection = abs(exact_value - root_bisection)
-                    result_bisection = root_bisection
-
-            # Secantes
+                tol = float(request.form.get("bisection_tol", 1e-6))
+                root, iterations, error_msg = bisection_method(f, a, b, tol)
+                results['bisection'] = {
+                    'root': root,
+                    'iterations': iterations,
+                    'error': abs(f(root)) if root is not None else None,
+                    'error_msg': error_msg
+                }
+                
             if 'secant' in request.form:
                 x0 = float(request.form["secant_x0"])
                 x1 = float(request.form["secant_x1"])
-                root_secant = secant_method(f, x0, x1)
-                if root_secant is not None:
-                    error_secant = abs(exact_value - root_secant)
-                    result_secant = root_secant
-
-            # Regula Falsi
+                tol = float(request.form.get("secant_tol", 1e-6))
+                root, iterations, error_msg = secant_method(f, x0, x1, tol)
+                results['secant'] = {
+                    'root': root,
+                    'iterations': iterations,
+                    'error': abs(f(root)) if root is not None else None,
+                    'error_msg': error_msg
+                }
+                
             if 'regula_falsi' in request.form:
                 a = float(request.form["regula_falsi_a"])
                 b = float(request.form["regula_falsi_b"])
-                root_regula_falsi = regula_falsi_method(f, a, b)
-                if root_regula_falsi is not None:
-                    error_regula_falsi = abs(exact_value - root_regula_falsi)
-                    result_regula_falsi = root_regula_falsi
-
-            # Trapecio
+                tol = float(request.form.get("regula_falsi_tol", 1e-6))
+                root, iterations, error_msg = regula_falsi_method(f, a, b, tol)
+                results['regula_falsi'] = {
+                    'root': root,
+                    'iterations': iterations,
+                    'error': abs(f(root)) if root is not None else None,
+                    'error_msg': error_msg
+                }
+                
             if 'trapezoidal' in request.form:
                 a = float(request.form["trapezoidal_a"])
                 b = float(request.form["trapezoidal_b"])
                 n = int(request.form["trapezoidal_n"])
-                result_trapezoidal = trapezoidal_method(f, a, b, n)
-
-            # Euler
+                result, points, values = trapezoidal_method(f, a, b, n)
+                results['trapezoidal'] = {
+                    'result': result,
+                    'points': points,
+                    'values': values
+                }
+                
             if 'euler' in request.form:
                 y0 = float(request.form["euler_y0"])
                 t0 = float(request.form["euler_t0"])
                 tn = float(request.form["euler_tn"])
                 h = float(request.form["euler_h"])
-                result_euler = euler_method(f_diff, y0, t0, tn, h)
-                # Solución exacta: y(t) = y0 * e^(-2t)
-                exact_euler = y0 * math.exp(-2 * (tn - t0))
-                error_euler = abs(exact_euler - result_euler)
-
-        except ValueError as e:
-            result = f"Error: {str(e)}"
+                result, points, values = euler_method(f_edo, y0, t0, tn, h)
+                # Solución exacta para EDO simple
+                if edo_expression == "-2*y":
+                    exact = y0 * math.exp(-2 * (tn - t0))
+                    error = abs(result - exact)
+                else:
+                    exact = None
+                    error = None
+                    
+                results['euler'] = {
+                    'result': result,
+                    'points': points,
+                    'values': values,
+                    'exact': exact,
+                    'error': error
+                }
+                
         except Exception as e:
-            result = f"Error: {str(e)}"
+            import traceback
+            results['error'] = f"Error: {str(e)}<br>{traceback.format_exc()}"
     
-    return render_template("index.html", 
-                           result=result, 
-                           error=error,
-                           result_bisection=result_bisection,
-                           error_bisection=error_bisection,
-                           result_secant=result_secant,
-                           error_secant=error_secant,
-                           result_regula_falsi=result_regula_falsi,
-                           error_regula_falsi=error_regula_falsi,
-                           result_trapezoidal=result_trapezoidal,
-                           error_trapezoidal=error_trapezoidal,
-                           result_euler=result_euler,
-                           error_euler=error_euler)
+    return render_template("index.html", results=results, 
+                           function=function_expression,
+                           derivative=derivative_expression,
+                           edo=edo_expression)
 
 if __name__ == "__main__":
     app.run(debug=True)
