@@ -25,6 +25,7 @@ def newton_raphson(f, df, x0, tol=1e-6, max_iter=100):
             return None, iterations, "Derivada cero"
             
         x_new = x - fx / dfx
+        fx_new = f(x_new)
         error = abs(x_new - x)
         iterations.append({
             'iteration': i+1,
@@ -34,8 +35,8 @@ def newton_raphson(f, df, x0, tol=1e-6, max_iter=100):
             'x_new': x_new,
             'error': error
         })
-        
-        if error < tol or abs(fx) < tol:
+
+        if error < tol or abs(fx_new) < tol:
             return x_new, iterations, None
             
         x = x_new
