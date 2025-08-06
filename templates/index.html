@@ -584,7 +584,16 @@
                 icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
             }
         }
-        
+
+        // Enable or disable inputs based on checkbox state
+        function toggleInputs(method) {
+            const checkbox = document.getElementById(method);
+            const inputs = document.querySelectorAll(`#${method}-content input:not([type=checkbox])`);
+            inputs.forEach(input => {
+                input.disabled = !checkbox.checked;
+            });
+        }
+
         // Initialize sections
         document.addEventListener('DOMContentLoaded', function() {
             const sections = ['newton', 'bisection', 'secant', 'regula_falsi', 'trapezoidal', 'euler', 'error_calc'];
@@ -592,6 +601,11 @@
                 const content = document.getElementById(`${section}-content`);
                 if (content) {
                     content.style.display = 'block';
+                    toggleInputs(section);
+                    const checkbox = document.getElementById(section);
+                    if (checkbox) {
+                        checkbox.addEventListener('change', () => toggleInputs(section));
+                    }
                 }
             });
         });
