@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Numérica Avanzada</title>
+    <title>Equipo 1 - Métodos de Aproximación y Error Numérico</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
         .method-section {
             margin-bottom: 2rem;
@@ -44,8 +45,8 @@
 <body>
     <div class="container py-4">
         <div class="text-center mb-4">
-            <h1 class="display-4"><i class="fas fa-calculator me-2"></i>Calculadora Numérica Avanzada</h1>
-            <p class="lead">Herramienta para métodos de aproximación y análisis de error numérico</p>
+            <h1 class="display-4"><i class="fas fa-calculator me-2"></i>Equipo 1: Métodos de Aproximación y Error Numérico</h1>
+            <p class="lead">Herramienta para métodos de aproximación y análisis de error</p>
         </div>
 
         <form method="POST">
@@ -307,6 +308,30 @@
                 </div>
             </div>
 
+            <!-- Error numérico -->
+            <div class="method-section">
+                <div class="method-header d-flex justify-content-between align-items-center" onclick="toggleSection('error_calc')">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Cálculo de Error Numérico</h4>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="error_calc-content">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="error_calc" name="error_calc">
+                        <label class="form-check-label" for="error_calc">Activar cálculo</label>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="true_value" class="form-label">Valor verdadero:</label>
+                            <input type="number" class="form-control" id="true_value" name="true_value" step="any" value="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="approx_value" class="form-label">Valor aproximado:</label>
+                            <input type="number" class="form-control" id="approx_value" name="approx_value" step="any" value="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="text-center mt-4">
                 <button type="submit" class="btn btn-primary btn-lg">
                     <i class="fas fa-calculator me-2"></i>Calcular Métodos Seleccionados
@@ -322,6 +347,18 @@
                 {% if 'error' in results %}
                     <div class="alert alert-danger">
                         <strong>Error:</strong> {{ results.error|safe }}
+                    </div>
+                {% endif %}
+
+                {% if 'error_calc' in results %}
+                    <div class="card mb-4 error-results">
+                        <div class="card-header bg-info text-white">
+                            <h3><i class="fas fa-exclamation-triangle me-2"></i>Resultados de Error Numérico</h3>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Error absoluto:</strong> {{ results.error_calc.absolute | round(8) }}</p>
+                            <p><strong>Error relativo:</strong> {% if results.error_calc.relative is not none %}{{ results.error_calc.relative | round(8) }}{% else %}N/A{% endif %}</p>
+                        </div>
                     </div>
                 {% endif %}
                 
@@ -550,7 +587,7 @@
         
         // Initialize sections
         document.addEventListener('DOMContentLoaded', function() {
-            const sections = ['newton', 'bisection', 'secant', 'regula_falsi', 'trapezoidal', 'euler'];
+            const sections = ['newton', 'bisection', 'secant', 'regula_falsi', 'trapezoidal', 'euler', 'error_calc'];
             sections.forEach(section => {
                 const content = document.getElementById(`${section}-content`);
                 if (content) {

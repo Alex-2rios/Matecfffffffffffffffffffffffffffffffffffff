@@ -176,6 +176,12 @@ def euler_method(f, y0, t0, tn, h):
         
     return y, points, values
 
+def calculate_error(true_value, approx_value):
+    """Devuelve el error absoluto y relativo entre dos valores."""
+    absolute_error = abs(true_value - approx_value)
+    relative_error = absolute_error / abs(true_value) if true_value != 0 else None
+    return absolute_error, relative_error
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     results = {}
@@ -267,13 +273,22 @@ def index():
                 else:
                     exact = None
                     error = None
-                    
+
                 results['euler'] = {
                     'result': result,
                     'points': points,
                     'values': values,
                     'exact': exact,
                     'error': error
+                }
+
+            if 'error_calc' in request.form:
+                true_value = float(request.form["true_value"])
+                approx_value = float(request.form["approx_value"])
+                abs_err, rel_err = calculate_error(true_value, approx_value)
+                results['error_calc'] = {
+                    'absolute': abs_err,
+                    'relative': rel_err
                 }
                 
         except Exception as e:
