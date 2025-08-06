@@ -507,10 +507,10 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {% for i in range(results.trapezoidal.points | length) %}
+                                                {% for x, fx in results.trapezoidal.points | zip(results.trapezoidal.values) %}
                                                     <tr>
-                                                        <td>{{ results.trapezoidal.points[i] | round(4) }}</td>
-                                                        <td>{{ results.trapezoidal.values[i] | round(6) }}</td>
+                                                        <td>{{ x | round(4) }}</td>
+                                                        <td>{{ fx | round(6) }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </tbody>
@@ -553,10 +553,10 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {% for i in range(results.euler.points | length) %}
+                                                {% for t, y in results.euler.points | zip(results.euler.values) %}
                                                     <tr>
-                                                        <td>{{ results.euler.points[i] | round(4) }}</td>
-                                                        <td>{{ results.euler.values[i] | round(6) }}</td>
+                                                        <td>{{ t | round(4) }}</td>
+                                                        <td>{{ y | round(6) }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </tbody>
