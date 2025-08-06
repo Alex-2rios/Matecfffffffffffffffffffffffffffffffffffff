@@ -196,14 +196,13 @@ def index():
             function_expression = request.form.get("function", "x**2 - 2")
             derivative_expression = request.form.get("derivative", "2*x")
             edo_expression = request.form.get("edo", "-2*y")
-            
-            # Crear funciones
+
+            # Crear función principal
             f = lambda x: eval(function_expression, {'x': x, **safe_dict})
-            df = lambda x: eval(derivative_expression, {'x': x, **safe_dict})
-            f_edo = lambda t, y: eval(edo_expression, {'t': t, 'y': y, **safe_dict})
-            
+
             # Procesar métodos seleccionados
             if 'newton' in request.form:
+                df = lambda x: eval(derivative_expression, {'x': x, **safe_dict})
                 x0 = float(request.form["newton_x0"])
                 tol = float(request.form.get("newton_tol", 1e-6))
                 root, iterations, error_msg = newton_raphson(f, df, x0, tol)
@@ -213,7 +212,7 @@ def index():
                     'error': abs(f(root)) if root is not None else None,
                     'error_msg': error_msg
                 }
-                
+
             if 'bisection' in request.form:
                 a = float(request.form["bisection_a"])
                 b = float(request.form["bisection_b"])
@@ -262,6 +261,7 @@ def index():
                 }
                 
             if 'euler' in request.form:
+                f_edo = lambda t, y: eval(edo_expression, {'t': t, 'y': y, **safe_dict})
                 y0 = float(request.form["euler_y0"])
                 t0 = float(request.form["euler_t0"])
                 tn = float(request.form["euler_tn"])
